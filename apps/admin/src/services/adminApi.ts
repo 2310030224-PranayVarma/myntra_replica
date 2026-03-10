@@ -81,7 +81,7 @@ export const adminApi = {
     id: string,
     status: OrderStatus
   ): Promise<AdminOrder> => {
-    const { data } = await apiClient.patch<AdminOrder>(
+    const { data } = await apiClient.put<AdminOrder>(
       `/admin/orders/${id}/status`,
       { status }
     );

@@ -147,7 +147,7 @@ export const mockProducts: Product[] = [
     brand: 'Zara',
     category: womenCategory,
     images: [
-      { id: '9', url: 'https://images.unsplash.com/photo-1583496661160-fb5218ees0f4?w=600', alt: 'Mini Skirt', isPrimary: true },
+      { id: '9', url: 'https://images.unsplash.com/photo-1583496661160-fb5218ee50f4?w=600', alt: 'Mini Skirt', isPrimary: true },
     ],
     tags: ['skirt', 'mini', 'casual', 'trendy'],
     isFeatured: false,
