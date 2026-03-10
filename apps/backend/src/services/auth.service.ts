@@ -21,7 +21,7 @@ export const authService = {
       throw new Error('Email already in use');
     }
 
-    const hashedPassword = await bcrypt.hash(input.password, 12);
+    const hashedPassword = await bcrypt.hash(input.password, parseInt(process.env.BCRYPT_ROUNDS || '12', 10));
 
     const user = await prisma.user.create({
       data: {

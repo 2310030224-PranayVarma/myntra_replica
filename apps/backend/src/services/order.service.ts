@@ -1,6 +1,10 @@
 import { prisma } from '../lib/prisma';
 import { OrderStatus } from '@prisma/client';
 
+const TAX_RATE = parseFloat(process.env.TAX_RATE || '0.18');
+const FREE_SHIPPING_THRESHOLD = parseFloat(process.env.FREE_SHIPPING_THRESHOLD || '999');
+const STANDARD_SHIPPING_COST = parseFloat(process.env.STANDARD_SHIPPING_COST || '99');
+
 interface CreateOrderInput {
   shippingAddressId: string;
   paymentMethod: string;
@@ -33,8 +37,8 @@ export const orderService = {
       return sum + price * item.quantity;
     }, 0);
 
-    const tax = subtotal * 0.18;
-    const shippingCost = subtotal > 999 ? 0 : 99;
+    const tax = subtotal * TAX_RATE;
+    const shippingCost = subtotal > FREE_SHIPPING_THRESHOLD ? 0 : STANDARD_SHIPPING_COST;
     const total = subtotal + tax + shippingCost;
 
     const order = await prisma.$transaction(async (tx) => {
@@ -127,7 +131,7 @@ export const orderService = {
 
     return prisma.order.update({
       where: { id: orderId },
-      data: { status: 'CANCELLED' },
+      data: { status: OrderStatus.CANCELLED },
     });
   },
 

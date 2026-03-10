@@ -34,7 +34,8 @@ app.get('/api/health', (_, res) => res.json({ status: 'ok' }));
 
 app.use((err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   console.error(err.stack);
-  res.status(500).json({ error: err.message || 'Internal server error' });
+  const message = process.env.NODE_ENV === 'production' ? 'Internal server error' : err.message;
+  res.status(500).json({ error: message });
 });
 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

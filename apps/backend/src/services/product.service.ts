@@ -68,20 +68,21 @@ export const productService = {
         include: {
           category: { select: { id: true, name: true, slug: true } },
           images: { where: { isPrimary: true }, take: 1 },
+          _count: { select: { reviews: true } },
           reviews: { select: { rating: true } },
         },
       }),
       prisma.product.count({ where }),
     ]);
 
-    const productsWithRating = items.map((p) => ({
-      ...p,
-      averageRating:
-        p.reviews.length > 0
-          ? p.reviews.reduce((sum, r) => sum + r.rating, 0) / p.reviews.length
-          : 0,
-      reviewCount: p.reviews.length,
-    }));
+    const productsWithRating = items.map((p) => {
+      const { reviews, ...rest } = p;
+      const averageRating =
+        reviews.length > 0
+          ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
+          : 0;
+      return { ...rest, averageRating, reviewCount: reviews.length };
+    });
 
     return {
       items: productsWithRating,
