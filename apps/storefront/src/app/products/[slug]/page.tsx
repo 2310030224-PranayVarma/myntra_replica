@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { notFound } from 'next/navigation';
+import { useParams, notFound } from 'next/navigation';
 import { Star, Truck, RefreshCw, Shield, Package, Heart, Share2 } from 'lucide-react';
 import { ProductGallery } from '@/components/product/ProductGallery';
 import { RecommendationCarousel } from '@/components/product/RecommendationCarousel';
@@ -11,11 +11,8 @@ import { Badge } from '@/components/ui/Badge';
 import { mockProducts } from '@/lib/mockData';
 import { formatPrice, calcDiscountPercent } from '@/lib/utils';
 
-interface ProductPageProps {
-  params: { slug: string };
-}
-
-export default function ProductPage({ params }: ProductPageProps) {
+export default function ProductPage() {
+  const params = useParams<{ slug: string }>();
   const product = mockProducts.find((p) => p.slug === params.slug);
 
   if (!product) notFound();
