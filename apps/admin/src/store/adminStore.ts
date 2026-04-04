@@ -3,6 +3,7 @@ import { create } from "zustand";
 interface AdminAuthState {
   token: string | null;
   isAuthenticated: boolean;
+  isHydrated: boolean;
   login: (token: string) => void;
   logout: () => void;
   initializeAuth: () => void;
@@ -11,6 +12,7 @@ interface AdminAuthState {
 export const useAdminStore = create<AdminAuthState>((set) => ({
   token: null,
   isAuthenticated: false,
+  isHydrated: false,
 
   login: (token: string) => {
     if (typeof window !== "undefined") {
@@ -30,8 +32,10 @@ export const useAdminStore = create<AdminAuthState>((set) => ({
     if (typeof window !== "undefined") {
       const token = localStorage.getItem("admin_token");
       if (token) {
-        set({ token, isAuthenticated: true });
+        set({ token, isAuthenticated: true, isHydrated: true });
+        return;
       }
     }
+    set({ token: null, isAuthenticated: false, isHydrated: true });
   },
 }));

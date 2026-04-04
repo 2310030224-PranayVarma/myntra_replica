@@ -10,6 +10,8 @@ import { cartRoutes } from './routes/cart.routes';
 import { wishlistRoutes } from './routes/wishlist.routes';
 import { orderRoutes } from './routes/order.routes';
 import { adminRoutes } from './routes/admin.routes';
+import { bootstrapService } from './services/bootstrap.service';
+import { connectMongo } from './lib/mongo';
 
 dotenv.config();
 
@@ -48,6 +50,23 @@ app.use((err: Error, _req: express.Request, res: express.Response, _next: expres
   res.status(500).json({ error: message });
 });
 
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.listen(PORT, async () => {
+  try {
+    await bootstrapService.ensureAdminAccount();
+  } catch (error) {
+    console.error('Admin bootstrap failed:', error instanceof Error ? error.message : error);
+  }
+
+  try {
+    await connectMongo();
+    if (process.env.MONGODB_URI) {
+      console.log('MongoDB Atlas connected');
+    }
+  } catch (error) {
+    console.error('MongoDB Atlas connection failed:', error instanceof Error ? error.message : error);
+  }
+
+  console.log(`Server running on port ${PORT}`);
+});
 
 export default app;

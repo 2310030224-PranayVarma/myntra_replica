@@ -1,6 +1,7 @@
 import bcrypt from 'bcryptjs';
 import { prisma } from '../lib/prisma';
 import { signToken } from '../utils/jwt';
+import { mongoAuthMirrorService } from './mongoAuthMirror.service';
 
 interface RegisterInput {
   email: string;
@@ -42,6 +43,14 @@ export const authService = {
     });
 
     const token = signToken({ userId: user.id, email: user.email, role: user.role });
+    await mongoAuthMirrorService.mirrorUser({
+      userId: user.id,
+      email: user.email,
+      name: user.name,
+      phone: user.phone,
+      role: user.role,
+      source: 'register',
+    });
     return { user, token };
   },
 
@@ -58,6 +67,14 @@ export const authService = {
 
     const token = signToken({ userId: user.id, email: user.email, role: user.role });
     const { password: _, ...userWithoutPassword } = user;
+    await mongoAuthMirrorService.mirrorUser({
+      userId: user.id,
+      email: user.email,
+      name: user.name,
+      phone: user.phone,
+      role: user.role,
+      source: 'login',
+    });
     return { user: userWithoutPassword, token };
   },
 
@@ -76,6 +93,16 @@ export const authService = {
       },
     });
     if (!user) throw new Error('User not found');
+
+    await mongoAuthMirrorService.mirrorUser({
+      userId: user.id,
+      email: user.email,
+      name: user.name,
+      phone: user.phone,
+      role: user.role,
+      source: 'profile',
+    });
+
     return user;
   },
 };

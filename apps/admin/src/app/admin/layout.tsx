@@ -11,25 +11,32 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   const router = useRouter();
-  const { isAuthenticated, initializeAuth } = useAdminStore();
+  const { isAuthenticated, isHydrated, initializeAuth } = useAdminStore();
 
   useEffect(() => {
     initializeAuth();
   }, [initializeAuth]);
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      const token = localStorage.getItem("admin_token");
-      if (!token) {
-        router.replace("/admin/login");
-      }
+    if (isHydrated && !isAuthenticated) {
+      router.replace("/admin/login");
     }
-  }, [isAuthenticated, router]);
+  }, [isHydrated, isAuthenticated, router]);
+
+  if (!isHydrated) {
+    return (
+      <div className="h-screen flex items-center justify-center bg-slate-100 text-slate-500 text-sm">
+        Loading admin session...
+      </div>
+    );
+  }
 
   if (!isAuthenticated) {
-    if (typeof window !== "undefined" && !localStorage.getItem("admin_token")) {
-      return null;
-    }
+    return (
+      <div className="h-screen flex items-center justify-center bg-slate-100 text-slate-500 text-sm">
+        Redirecting to login...
+      </div>
+    );
   }
 
   return (
