@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Myntra favicon">
+  <defs>
+    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ff3f6c" />
+      <stop offset="100%" stop-color="#ff527b" />
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="14" fill="#111827" />
+  <path
+    d="M17 49V15h8l7 12 7-12h8v34h-8V31l-7 11-7-11v18h-8z"
+    fill="url(#g)"
+  />
+</svg>

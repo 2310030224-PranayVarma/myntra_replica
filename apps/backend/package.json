@@ -6,10 +6,12 @@
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
     "build": "tsc",
-    "test": "JWT_SECRET=test-secret npm run build && node --test \"dist/**/*.test.js\"",
+    "test": "JWT_SECRET=test-secret npm run build && JWT_SECRET=test-secret node --test \"dist/**/*.test.js\"",
     "start": "node dist/index.js",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
+    "prisma:deploy": "prisma migrate deploy",
+    "prisma:push": "prisma db push",
     "prisma:studio": "prisma studio"
   },
   "dependencies": {
