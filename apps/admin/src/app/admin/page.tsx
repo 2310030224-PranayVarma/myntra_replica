@@ -194,7 +194,7 @@ export default function AdminDashboardPage() {
                       {product.stock}
                     </td>
                     <td className="px-6 py-3 text-right text-slate-600">
-                      {product._count?.orderItems ?? 0}
+                      {product.totalSold ?? product._count?.orderItems ?? 0}
                     </td>
                   </tr>
                 ))

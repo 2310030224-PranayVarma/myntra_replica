@@ -15,9 +15,19 @@ dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 4000;
+const defaultAllowedOrigins = ['http://localhost:3000', 'http://localhost:3001'];
+const allowedOrigins = (process.env.CORS_ORIGIN || defaultAllowedOrigins.join(','))
+  .split(',')
+  .map((origin) => origin.trim())
+  .filter(Boolean);
 
 app.use(helmet());
-app.use(cors({ origin: process.env.CORS_ORIGIN || 'http://localhost:3000', credentials: true }));
+app.use(
+  cors({
+    origin: allowedOrigins,
+    credentials: true,
+  })
+);
 app.use(morgan('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

@@ -33,18 +33,16 @@ export function useCart() {
       size?: string;
       color?: string;
     }) => cartService.addToCart(productId, quantity, size, color),
-    onSuccess: (data) => {
-      setCart(data);
-      queryClient.setQueryData(['cart'], data);
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['cart'] });
     },
   });
 
   const removeMutation = useMutation({
     mutationFn: (itemId: string) => cartService.removeFromCart(itemId),
     onMutate: (itemId) => removeItem(itemId),
-    onSuccess: (data) => {
-      setCart(data);
-      queryClient.setQueryData(['cart'], data);
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['cart'] });
     },
     onError: () => queryClient.invalidateQueries({ queryKey: ['cart'] }),
   });
@@ -53,9 +51,8 @@ export function useCart() {
     mutationFn: ({ itemId, quantity }: { itemId: string; quantity: number }) =>
       cartService.updateCartItem(itemId, quantity),
     onMutate: ({ itemId, quantity }) => updateItem(itemId, quantity),
-    onSuccess: (data) => {
-      setCart(data);
-      queryClient.setQueryData(['cart'], data);
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['cart'] });
     },
     onError: () => queryClient.invalidateQueries({ queryKey: ['cart'] }),
   });

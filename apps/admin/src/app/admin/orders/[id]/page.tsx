@@ -194,7 +194,7 @@ export default function OrderDetailPage() {
             <span className="text-slate-500">Payment Status</span>
             <span
               className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                order.paymentStatus === "PAID"
+                order.paymentStatus === "COMPLETED"
                   ? "bg-green-100 text-green-700"
                   : order.paymentStatus === "FAILED"
                   ? "bg-red-100 text-red-700"

@@ -9,6 +9,15 @@ import type {
   WishlistItem,
 } from '@/types';
 
+interface ApiEnvelope<T> {
+  success: boolean;
+  data: T;
+  message?: string;
+  error?: string;
+}
+
+const unwrap = <T>(payload: ApiEnvelope<T>): T => payload.data;
+
 // ─── Product Service ──────────────────────────────────────────────────────────
 
 export const productService = {
@@ -22,26 +31,56 @@ export const productService = {
     sortBy?: string;
     search?: string;
     tags?: string;
+    featured?: string;
   }): Promise<PaginatedProducts> {
-    const { data } = await axiosInstance.get('/products', { params });
-    return data;
+    const requestParams = params
+      ? {
+          page: params.page,
+          limit: params.limit,
+          category: params.category,
+          brand: params.brand,
+          minPrice: params.priceMin,
+          maxPrice: params.priceMax,
+          sort: params.sortBy,
+          search: params.search,
+          tags: params.tags,
+          featured: params.featured,
+        }
+      : undefined;
+
+    const { data } = await axiosInstance.get<ApiEnvelope<{
+      items: Product[];
+      total: number;
+      page: number;
+      limit: number;
+      totalPages: number;
+    }>>('/products', { params: requestParams });
+    const result = unwrap(data);
+    return {
+      products: result.items,
+      total: result.total,
+      page: result.page,
+      limit: result.limit,
+      totalPages: result.totalPages,
+    };
   },
 
   async getProduct(slug: string): Promise<Product> {
-    const { data } = await axiosInstance.get(`/products/${slug}`);
-    return data;
+    const { data } = await axiosInstance.get<ApiEnvelope<Product>>(`/products/${slug}`);
+    return unwrap(data);
   },
 
   async getFeaturedProducts(): Promise<Product[]> {
-    const { data } = await axiosInstance.get('/products/featured');
-    return data;
+    const products = await this.getProducts({ featured: 'true', limit: 12 });
+    return products.products;
   },
 
   async searchProducts(query: string): Promise<Product[]> {
-    const { data } = await axiosInstance.get('/products/search', {
-      params: { q: query },
+    const products = await this.getProducts({
+      search: query,
+      limit: 24,
     });
-    return data;
+    return products.products;
   },
 };
 
@@ -49,13 +88,13 @@ export const productService = {
 
 export const categoryService = {
   async getCategories(): Promise<Category[]> {
-    const { data } = await axiosInstance.get('/categories');
-    return data;
+    const { data } = await axiosInstance.get<ApiEnvelope<Category[]>>('/categories');
+    return unwrap(data);
   },
 
   async getCategory(slug: string): Promise<Category> {
-    const { data } = await axiosInstance.get(`/categories/${slug}`);
-    return data;
+    const { data } = await axiosInstance.get<ApiEnvelope<Category>>(`/categories/${slug}`);
+    return unwrap(data);
   },
 };
 
@@ -63,8 +102,8 @@ export const categoryService = {
 
 export const cartService = {
   async getCart(): Promise<Cart> {
-    const { data } = await axiosInstance.get('/cart');
-    return data;
+    const { data } = await axiosInstance.get<ApiEnvelope<Cart>>('/cart');
+    return unwrap(data);
   },
 
   async addToCart(
@@ -72,26 +111,23 @@ export const cartService = {
     quantity: number,
     size?: string,
     color?: string
-  ): Promise<Cart> {
-    const { data } = await axiosInstance.post('/cart/items', {
+  ): Promise<void> {
+    await axiosInstance.post('/cart/items', {
       productId,
       quantity,
       size,
       color,
     });
-    return data;
   },
 
-  async updateCartItem(itemId: string, quantity: number): Promise<Cart> {
-    const { data } = await axiosInstance.patch(`/cart/items/${itemId}`, {
+  async updateCartItem(itemId: string, quantity: number): Promise<void> {
+    await axiosInstance.put(`/cart/items/${itemId}`, {
       quantity,
     });
-    return data;
   },
 
-  async removeFromCart(itemId: string): Promise<Cart> {
-    const { data } = await axiosInstance.delete(`/cart/items/${itemId}`);
-    return data;
+  async removeFromCart(itemId: string): Promise<void> {
+    await axiosInstance.delete(`/cart/items/${itemId}`);
   },
 
   async clearCart(): Promise<void> {
@@ -103,13 +139,13 @@ export const cartService = {
 
 export const wishlistService = {
   async getWishlist(): Promise<WishlistItem[]> {
-    const { data } = await axiosInstance.get('/wishlist');
-    return data;
+    const { data } = await axiosInstance.get<ApiEnvelope<WishlistItem[]>>('/wishlist');
+    return unwrap(data);
   },
 
   async addToWishlist(productId: string): Promise<WishlistItem> {
-    const { data } = await axiosInstance.post('/wishlist', { productId });
-    return data;
+    const { data } = await axiosInstance.post<ApiEnvelope<WishlistItem>>('/wishlist', { productId });
+    return unwrap(data);
   },
 
   async removeFromWishlist(productId: string): Promise<void> {
@@ -125,18 +161,21 @@ export const orderService = {
     paymentMethod: string;
     couponCode?: string;
   }): Promise<Order> {
-    const { data: order } = await axiosInstance.post('/orders', data);
-    return order;
+    const { data: order } = await axiosInstance.post<ApiEnvelope<Order>>('/orders', {
+      shippingAddressId: data.addressId,
+      paymentMethod: data.paymentMethod,
+    });
+    return unwrap(order);
   },
 
   async getOrders(): Promise<Order[]> {
-    const { data } = await axiosInstance.get('/orders');
-    return data;
+    const { data } = await axiosInstance.get<ApiEnvelope<Order[]>>('/orders');
+    return unwrap(data);
   },
 
   async getOrder(id: string): Promise<Order> {
-    const { data } = await axiosInstance.get(`/orders/${id}`);
-    return data;
+    const { data } = await axiosInstance.get<ApiEnvelope<Order>>(`/orders/${id}`);
+    return unwrap(data);
   },
 };
 
@@ -147,11 +186,11 @@ export const authService = {
     email: string,
     password: string
   ): Promise<{ user: User; token: string }> {
-    const { data } = await axiosInstance.post('/auth/login', {
+    const { data } = await axiosInstance.post<ApiEnvelope<{ user: User; token: string }>>('/auth/login', {
       email,
       password,
     });
-    return data;
+    return unwrap(data);
   },
 
   async register(
@@ -160,21 +199,21 @@ export const authService = {
     password: string,
     phone?: string
   ): Promise<{ user: User; token: string }> {
-    const { data } = await axiosInstance.post('/auth/register', {
+    const { data } = await axiosInstance.post<ApiEnvelope<{ user: User; token: string }>>('/auth/register', {
       name,
       email,
       password,
       phone,
     });
-    return data;
+    return unwrap(data);
   },
 
   async getMe(): Promise<User> {
-    const { data } = await axiosInstance.get('/auth/me');
-    return data;
+    const { data } = await axiosInstance.get<ApiEnvelope<User>>('/auth/profile');
+    return unwrap(data);
   },
 
   async logout(): Promise<void> {
-    await axiosInstance.post('/auth/logout');
+    return Promise.resolve();
   },
 };

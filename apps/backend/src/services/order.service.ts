@@ -135,10 +135,12 @@ export const orderService = {
     });
   },
 
-  async getAllOrders(page: number = 1, limit: number = 10) {
+  async getAllOrders(page: number = 1, limit: number = 10, status?: OrderStatus) {
     const skip = (page - 1) * limit;
+    const where = status ? { status } : undefined;
     const [items, total] = await Promise.all([
       prisma.order.findMany({
+        where,
         skip,
         take: limit,
         include: {
@@ -148,7 +150,7 @@ export const orderService = {
         },
         orderBy: { createdAt: 'desc' },
       }),
-      prisma.order.count(),
+      prisma.order.count({ where }),
     ]);
     return { items, total, page, limit, totalPages: Math.ceil(total / limit) };
   },

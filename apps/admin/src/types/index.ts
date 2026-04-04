@@ -21,6 +21,7 @@ export interface AdminProduct {
   category: { id: string; name: string };
   images: { url: string; isPrimary: boolean }[];
   _count?: { reviews: number; orderItems: number };
+  totalSold?: number;
   createdAt: string;
 }
 
@@ -28,7 +29,7 @@ export interface AdminOrder {
   id: string;
   status: string;
   total: number;
-  paymentStatus: string;
+  paymentStatus: "PENDING" | "COMPLETED" | "FAILED" | "REFUNDED";
   user: { id: string; name: string; email: string };
   items: {
     id: string;

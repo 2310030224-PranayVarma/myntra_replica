@@ -28,7 +28,7 @@ const STATUS_COLORS: Record<string, string> = {
 
 const PAYMENT_COLORS: Record<string, string> = {
   PENDING: "bg-yellow-50 text-yellow-700",
-  PAID: "bg-green-50 text-green-700",
+  COMPLETED: "bg-green-50 text-green-700",
   FAILED: "bg-red-50 text-red-700",
   REFUNDED: "bg-slate-50 text-slate-700",
 };
